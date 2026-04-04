@@ -45,7 +45,9 @@ class CharList extends Component {
     const { charList, loading, error } = this.state;
     const errorMessage = error ? <ErrorMessage /> : null;
     const spinner = loading ? <Spinner /> : null;
-    const content = !(loading || error) ? <View charList={charList} /> : null;
+    const content = !(loading || error) ? (
+      <View charList={charList} onCharSelected={this.props.onCharSelected} />
+    ) : null;
     return (
       <div className="char__list">
         {errorMessage}
@@ -59,14 +61,18 @@ class CharList extends Component {
   }
 }
 
-const View = ({ charList }) => {
+const View = ({ charList, onCharSelected }) => {
   const onError = (e) => {
     e.target.src = not_found;
     e.target.onerror = null;
   };
   const char = charList.map((item) => {
     return (
-      <li className="char__item" key={item.id}>
+      <li
+        className="char__item"
+        key={item.id}
+        onClick={() => onCharSelected(item.id)}
+      >
         <img src={item.thumbnail} alt={item.name} onError={onError} />
         <div className="char__name">{item.name}</div>
       </li>
