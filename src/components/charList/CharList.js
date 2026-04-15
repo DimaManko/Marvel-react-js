@@ -1,4 +1,5 @@
 import { Component } from "react";
+import PropTypes from "prop-types";
 import "./charList.scss";
 import MarvelService from "../../services/MarvelService";
 import ErrorMessage from "../errorMessage/ErrorMessage";
@@ -110,6 +111,10 @@ const View = ({ charList, onCharSelected }) => {
     );
   });
   return <ul className="char__grid">{char}</ul>;
+};
+
+CharList.propTypes = {
+  onCharSelected: PropTypes.func.isRequired,
 };
 
 export default CharList;
