@@ -18,6 +18,8 @@ class CharList extends Component {
 
   marvelService = new MarvelService();
 
+  itemRefs = [];
+
   componentDidMount() {
     this.getCharList();
   }
@@ -67,13 +69,30 @@ class CharList extends Component {
       .catch(this.onError);
   };
 
+  setRef = (ref, i) => {
+    this.itemRefs[i] = ref;
+  };
+
+  focusOnItem = (id) => {
+    this.itemRefs.forEach((item) => {
+      item.classList.remove("char__item_selected");
+    });
+    this.itemRefs[id].classList.add("char__item_selected");
+    this.itemRefs[id].focus();
+  };
+
   render() {
     const { charList, loading, error, offset, newItemLoading, charEnded } =
       this.state;
     const errorMessage = error ? <ErrorMessage /> : null;
     const spinner = loading ? <Spinner /> : null;
     const content = !(loading || error) ? (
-      <View charList={charList} onCharSelected={this.props.onCharSelected} />
+      <View
+        charList={charList}
+        onCharSelected={this.props.onCharSelected}
+        setRef={this.setRef}
+        focusOnItem={this.focusOnItem}
+      />
     ) : null;
     return (
       <div className="char__list">
@@ -93,17 +112,28 @@ class CharList extends Component {
   }
 }
 
-const View = ({ charList, onCharSelected }) => {
+const View = ({ charList, onCharSelected, setRef, focusOnItem }) => {
   const onError = (e) => {
     e.target.src = not_found;
     e.target.onerror = null;
   };
-  const char = charList.map((item) => {
+  const char = charList.map((item, i) => {
     return (
       <li
+        tabIndex="0"
         className="char__item"
         key={item.id}
-        onClick={() => onCharSelected(item.id)}
+        ref={(el) => setRef(el, i)}
+        onClick={() => {
+          onCharSelected(item.id);
+          focusOnItem(i);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === " " || e.key === "Enter") {
+            onCharSelected(item.id);
+            focusOnItem(i);
+          }
+        }}
       >
         <img src={item.thumbnail} alt={item.name} onError={onError} />
         <div className="char__name">{item.name}</div>
