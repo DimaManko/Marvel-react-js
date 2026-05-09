@@ -1,35 +1,22 @@
 import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import "./charList.scss";
-import MarvelService from "../../services/MarvelService";
+import useMarvelService from "../../services/MarvelService";
 import ErrorMessage from "../errorMessage/ErrorMessage";
 import Spinner from "../spinner/spinner";
 import not_found from "../../resources/img/not-found.jpg";
 
 const CharList = (props) => {
   const [charList, setCharList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const [newItemLoading, setNewItemLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [charEnded, setCharEnded] = useState(false);
 
-  const marvelService = new MarvelService();
+  const { loading, error, getAllCharacters } = useMarvelService();
 
   useEffect(() => {
-    getCharList();
+    onRequest(offset, true);
   }, []);
-
-  const getCharList = () => {
-    onCharListLoading();
-    marvelService.getAllCharacters().then(onCharListLoaded).catch(onError);
-  };
-
-  const onCharListLoading = () => {
-    setLoading(true);
-    setError(false);
-    setNewItemLoading(false);
-  };
 
   const onCharListLoaded = (newCharList) => {
     let ended = false;
@@ -38,24 +25,15 @@ const CharList = (props) => {
     }
 
     setCharList((charList) => [...charList, ...newCharList]);
-    setLoading((loading) => false);
     setNewItemLoading((newItemLoading) => false);
     setOffset((offset) => offset + 9);
     setCharEnded((charEnded) => ended);
   };
 
-  const onError = () => {
-    setError(true);
-    setLoading(false);
-  };
+  const onRequest = (offset, inital) => {
+    inital ? setNewItemLoading(false) : setNewItemLoading(true);
 
-  const onRequest = (offset) => {
-    setNewItemLoading(true);
-
-    marvelService
-      .getAllCharacters(offset)
-      .then(onCharListLoaded)
-      .catch(onError);
+    getAllCharacters(offset).then(onCharListLoaded);
   };
 
   const itemRefs = useRef([]);
@@ -73,15 +51,15 @@ const CharList = (props) => {
   };
 
   const errorMessage = error ? <ErrorMessage /> : null;
-  const spinner = loading ? <Spinner /> : null;
-  const content = !(loading || error) ? (
+  const spinner = loading && !newItemLoading ? <Spinner /> : null;
+  const content = (
     <View
       charList={charList}
       onCharSelected={props.onCharSelected}
       setRef={setRef}
       focusOnItem={focusOnItem}
     />
-  ) : null;
+  );
   return (
     <div className="char__list">
       {errorMessage}

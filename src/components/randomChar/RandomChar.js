@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import "./randomChar.scss";
-import MarvelService from "../../services/MarvelService";
+import useMarvelService from "../../services/MarvelService";
 import mjolnir from "../../resources/img/mjolnir.png";
 import not_found from "../../resources/img/not-found.jpg";
 import Spinner from "../spinner/spinner";
@@ -9,34 +9,26 @@ import ErrorMessage from "../errorMessage/ErrorMessage";
 
 const RandomChar = () => {
   const [char, setChar] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
-  const marvelService = new MarvelService();
+  const { loading, error, getCharacters, clearError } = useMarvelService();
 
   useEffect(() => {
     updateChar();
+    const timerId = setInterval(updateChar, 60000);
+
+    return () => {
+      clearInterval(timerId);
+    };
   }, []);
 
   const onCharLoaded = (char) => {
     setChar(char);
-    setLoading(false);
-  };
-
-  const onError = () => {
-    setLoading(false);
-    setError(true);
-  };
-
-  const onCharLoading = () => {
-    setLoading(true);
-    setError(false);
   };
 
   const updateChar = () => {
+    clearError();
     const id = Math.floor(Math.random() * 20) + 1;
-    onCharLoading();
-    marvelService.getCharacters(id).then(onCharLoaded).catch(onError);
+    getCharacters(id).then(onCharLoaded);
   };
 
   const errorMessage = error ? <ErrorMessage /> : null;
