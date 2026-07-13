@@ -2,7 +2,7 @@ import "./comicsList.scss";
 
 import useMarvelService from "../../services/MarvelService";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import ErrorMessage from "../errorMessage/ErrorMessage";
@@ -66,7 +66,12 @@ const ComicsList = (props) => {
       {items}
       {errorMessage}
       {spinner}
-      <button className="button button__main button__long">
+      <button
+        className="button button__main button__long"
+        disabled={newItemLoading}
+        style={{ display: comicsEnded ? "none" : "block" }}
+        onClick={() => onRequest(offset)}
+      >
         <div className="inner">load more</div>
       </button>
     </div>
