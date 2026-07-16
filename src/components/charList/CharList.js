@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, createRef, useMemo } from "react";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
 import PropTypes from "prop-types";
 import "./charList.scss";
 import useMarvelService from "../../services/MarvelService";
@@ -82,30 +83,45 @@ const View = ({ charList, onCharSelected, setRef, focusOnItem }) => {
     e.target.src = not_found;
     e.target.onerror = null;
   };
+
   const char = charList.map((item, i) => {
+    const itemRef = createRef(null);
     return (
-      <li
-        tabIndex="0"
-        className="char__item"
+      <CSSTransition
         key={item.id}
-        ref={(el) => setRef(el, i)}
-        onClick={() => {
-          onCharSelected(item.id);
-          focusOnItem(i);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === " " || e.key === "Enter") {
+        timeout={500}
+        classNames={"char__item"}
+        nodeRef={itemRef}
+      >
+        <li
+          tabIndex="0"
+          className="char__item"
+          ref={(el) => {
+            itemRef.current = el;
+            setRef(el, i);
+          }}
+          onClick={() => {
             onCharSelected(item.id);
             focusOnItem(i);
-          }
-        }}
-      >
-        <img src={item.thumbnail} alt={item.name} onError={onError} />
-        <div className="char__name">{item.name}</div>
-      </li>
+          }}
+          onKeyDown={(e) => {
+            if (e.key === " " || e.key === "Enter") {
+              onCharSelected(item.id);
+              focusOnItem(i);
+            }
+          }}
+        >
+          <img src={item.thumbnail} alt={item.name} onError={onError} />
+          <div className="char__name">{item.name}</div>
+        </li>
+      </CSSTransition>
     );
   });
-  return <ul className="char__grid">{char}</ul>;
+  return (
+    <TransitionGroup className="char__grid" component="ul">
+      {char}
+    </TransitionGroup>
+  );
 };
 
 CharList.propTypes = {

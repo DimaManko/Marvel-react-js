@@ -49,7 +49,7 @@ const ComicsList = (props) => {
               className="comics__item-img"
             />
             <div className="comics__item-name">{comics.title}</div>
-            <div className="comics__item-price">{comics.prices}</div>
+            <div className="comics__item-price">{comics.prices}$</div>
           </Link>
         </li>
       );
