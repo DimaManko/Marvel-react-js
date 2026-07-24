@@ -43,10 +43,17 @@
       margin-top: 25px;
     }
     &-success {
+      margin-top: 25px;
+      display: flex; /* Включаем flexbox */
+      justify-content: space-between; /* Раскидываем текст и кнопку по краям */
+      align-items: center; /* Выравниваем по центру по вертикали */
       font-weight: bold;
       font-size: 18px;
       line-height: 24px;
       color: #03710e;
+
+      /* Если у тебя кнопка внутри успеха оборачивается в Link, 
+         можно подстраховать её отцовский элемент */
     }
   }
 }
