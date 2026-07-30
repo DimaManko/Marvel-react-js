@@ -1,20 +1,25 @@
+import { Helmet } from "react-helmet";
 import "./SingleLayoutPage.scss";
-
 import { Link } from "react-router-dom";
 
-const SingleLayoutPage = ({ data, dataType }) => {
+const SingleLayoutPage = ({ data: contentObj }) => {
+  const { data: itemData, dataType } = contentObj;
   const { title, name, description, pageCount, thumbnail, language, prices } =
-    data;
+    itemData;
 
   const displayName = title || name;
-
   const backPath = dataType === "comics" ? "/comics" : "/";
   const imgStyleClass =
     dataType === "comics"
       ? "single-layout-page__img single-layout-page__img_comic"
       : "single-layout-page__img single-layout-page__img_char";
+
   return (
     <div className="single-layout-page">
+      <Helmet>
+        <meta name="description" content={`${displayName} page`} />
+        <title>{displayName}</title>
+      </Helmet>
       <img src={thumbnail} alt={displayName} className={imgStyleClass} />
       <div className="single-layout-page__info">
         <h2 className="single-layout-page__name">{displayName}</h2>

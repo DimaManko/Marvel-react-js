@@ -1,10 +1,15 @@
+import { Helmet } from "react-helmet";
+
 import ComicsList from "../comicsList/ComicsList";
 import AppBanner from "../appBanner/AppBanner";
-import { Outlet } from "react-router-dom";
 
 const ComicsPage = () => {
   return (
     <>
+      <Helmet>
+        <meta name="description" content="Marvel comics" />
+        <title>Marvel comics</title>
+      </Helmet>
       <AppBanner />
       <ComicsList />
     </>

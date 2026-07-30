@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, createRef, useMemo } from "react";
+import { useState, useEffect, useRef, createRef } from "react";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import PropTypes from "prop-types";
 import "./charList.scss";
@@ -7,13 +7,28 @@ import ErrorMessage from "../errorMessage/ErrorMessage";
 import Spinner from "../spinner/spinner";
 import not_found from "../../resources/img/not-found.jpg";
 
+const setContent = (process, data, Component, newItemLoading) => {
+  switch (process) {
+    case "waiting":
+      return <Spinner />;
+    case "loading":
+      return newItemLoading ? <Component data={data} /> : <Spinner />;
+    case "confirmed":
+      return <Component data={data} />;
+    case "error":
+      return <ErrorMessage />;
+    default:
+      throw new Error("Unexpected process state");
+  }
+};
+
 const CharList = (props) => {
   const [charList, setCharList] = useState([]);
   const [newItemLoading, setNewItemLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [charEnded, setCharEnded] = useState(false);
 
-  const { loading, error, getAllCharacters } = useMarvelService();
+  const { getAllCharacters, process, setProcess } = useMarvelService();
 
   useEffect(() => {
     onRequest(offset, true);
@@ -34,7 +49,9 @@ const CharList = (props) => {
   const onRequest = (offset, inital) => {
     inital ? setNewItemLoading(false) : setNewItemLoading(true);
 
-    getAllCharacters(offset).then(onCharListLoaded);
+    getAllCharacters(offset)
+      .then(onCharListLoaded)
+      .then(() => setProcess("confirmed"));
   };
 
   const itemRefs = useRef([]);
@@ -51,21 +68,19 @@ const CharList = (props) => {
     itemRefs.current[id].focus();
   };
 
-  const errorMessage = error ? <ErrorMessage /> : null;
-  const spinner = loading && !newItemLoading ? <Spinner /> : null;
-  const content = (
-    <View
-      charList={charList}
-      onCharSelected={props.onCharSelected}
-      setRef={setRef}
-      focusOnItem={focusOnItem}
-    />
-  );
   return (
     <div className="char__list">
-      {errorMessage}
-      {spinner}
-      {content}
+      {setContent(
+        process,
+        {
+          charList,
+          onCharSelected: props.onCharSelected,
+          setRef,
+          focusOnItem,
+        },
+        View,
+        newItemLoading,
+      )}
       <button
         className="button button__main button__long"
         disabled={newItemLoading}
@@ -78,7 +93,8 @@ const CharList = (props) => {
   );
 };
 
-const View = ({ charList, onCharSelected, setRef, focusOnItem }) => {
+const View = ({ data }) => {
+  const { charList, onCharSelected, setRef, focusOnItem } = data;
   const onError = (e) => {
     e.target.src = not_found;
     e.target.onerror = null;
